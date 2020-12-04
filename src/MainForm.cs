@@ -1,90 +1,15 @@
+namespace DemiseTheReversation {
+
 using System.Windows.Forms;
 using System.IO;
 using System;
-
-namespace DemiseTheReversation {
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-public enum FileType {
-    DED = 1,
-    DER = 2,
-}
+using static DemiseConsts;
+using static Misc;
 
 public partial class MainForm : Form {
-    public string[] CODED_DED_FILES = {
-        "DEMISETextures.DED",
-        "DEMISEBountyData.DED",
-        "DEMISEData.DED",
-        "DEMISEDungeon.DED",
-        "DEMISEDungeonGroups.DED",
-        "DEMISEGuildTitles.DED",
-        "DEMISEInfoDungeon.DED",
-        "DEMISEInfoGeneral.DED",
-        "DEMISEInfoItems.DED",
-        "DEMISEInfoMonsters.DED",
-        "DEMISEInfoQuest.DED",
-        "DEMISEInfoRaceGuild.DED",
-        "DEMISEInfoSpell.DED",
-        "DEMISEInfoStory.DED",
-        "DEMISEInfoTalk.DED",
-        "DEMISEMazeItemIndex.DED",
-        "DEMISELanguages.DED",
-        "DEMISEMainStoryline.DED",
-        "DEMISEMazeItems.DED",
-        "DEMISEMonsters.DED",
-        "DEMISEObjects.DED",
-        "DEMISEObjectsI.DED",
-        "DEMISEQuestData.DED",
-        "DEMISESketchData.DED",
-        "DEMISESoundData.DED",
-        "DEMISESpells.DED",
-        "DEMISESystemData.DED",
-        "DEMISECharacters.DED",
-        "DEMISEMultiConfig.DED",
-        //"DEMISEGameNews.DED",
-        //"DEMISEGameNewsIndex.DED",
-        //"DEMISEAutomap.DED",
-        "DEMISEMazeMonsters.DED",
-        "DEMISELibrary.DED",
-        "DEMISEHallOfRecords.DED",
-        "DEMISEGuildMasters.DED",
-        //"DEMISEGuildLogs.DED",
-        "DEMISEStoryIndex.DED",
-        "DEMISEStore.DED",
-        "DEMISECompanionStore.DED",
-        "DEMISEGuildSpells.DED",
-        "DEMISEObjectsISP.DED",
-        "DEMISEItems.DED",
-        "DEMISEGameBounties.DED",
-        //"DEMISEPartyData.DED",
-        "DEMISEBountyIndex.DED",
-        "DEMISEItemIndex.DED",
-        "DEMISEAutomapAnnotations.DED",
-        "DEMISEAutomapAnnotationsIndex.DED",
-    };
-
-    public byte[] DED_HEADER_XOR_MASK = {
-        0xA7, 0x8F, 0x56, 0xFD, 0x3E, 0x1D, 0x7C, 0xBD, 0xDC, 0xE6, 0xBE, 0x6D,
-    };
-
-    public byte[] DED_ASC_HEADER_XOR_MASK = {
-        /*0xb9,0xb6,0x85,0xd7,*/ 0x7F, 0xDC, 0xA5, 0xB5, /* DED_ASC_XOR_MASK */ 0x1E, 0x2E, 0x9D, 0xF4, 0xCE, 0x38,
-        0xB0, 0xC6,
-    };
-
-    public byte[] DED_XOR_MASK = {
-        0x80, 0xDD, 0x13, 0x7F, 0x8C, 0xDA, 0x80, 0xC2, 0xA7, 0x51, 0xEA, 0x21, 0x86, 0xA1, 0xAE, 0xF0,
-        0x1D, 0xB1, 0xFC, 0x1D, 0xA1, 0x55, 0xDC, 0x9C, 0x47, 0x49, 0x80, 0x8B, 0xBF, 0x60, 0x65, 0xFD,
-        0xDA, 0xFD, 0x47,
-    };
-
-    public byte[] DED_ASC_XOR_MASK = {
-        0x1E, 0x2E, 0x9D, 0xF4, 0xCE, 0x38, 0xB0, 0xC6,
-    };
-
     public MainForm() {
         InitializeComponent();
 
@@ -116,7 +41,8 @@ public partial class MainForm : Form {
 
     private void fileOpenEventHandler( object? sender, EventArgs eventArgs ) {
         using OpenFileDialog openFileDialog = new() {
-            Filter = "DED files (*.DED)|*.DED|DER files (*.DER)|*.DER|All files (*.*)|*.*",
+            Filter =
+                @"Demise assets (*.DED, *.DER)|*.DED;*.DER|DED files (*.DED)|*.DED|DER files (*.DER)|*.DER|All files (*.*)|*.*",
         };
 
         if ( openFileDialog.ShowDialog() != DialogResult.OK ) {
@@ -127,11 +53,11 @@ public partial class MainForm : Form {
         string ext = Path.GetExtension( filePath );
 
         FileType ft = openFileDialog.FilterIndex switch {
-            1 => FileType.DED,
-            2 => FileType.DER,
+            2 => FileType.DED,
+            3 => FileType.DER,
             _ => ext switch {
-                "DED" => FileType.DED,
-                "DER" => FileType.DER,
+                ".DED" => FileType.DED,
+                ".DER" => FileType.DER,
                 _ => throw new ArgumentException( $"unknown extension '{ext}'" )
             }
         };
@@ -146,121 +72,103 @@ public partial class MainForm : Form {
         }
     }
 
-    public const int STAT_IDX_MAX = 6;
-
-    public static string[] ITEM_TYPE_NAMES = {
-        "Te-Waza",
-        "Dagger",
-        "Cross",
-        "Sword",
-        "Staff",
-        "Mace",
-        "Axe",
-        "Hammer",
-        "Leather Armor",
-        "Chain Armor",
-        "Plate Armor",
-        "Shield",
-        "Cap",
-        "Helmet",
-        "Gloves",
-        "Gauntlets",
-        "Cloak",
-        "Bracers",
-        "Sash",
-        "Belt",
-        "Boots",
-        "Ring",
-        "Amulet",
-        "Potion",
-        "Scroll",
-        "Tome",
-        "Dust",
-        "Crystal",
-        "Rod",
-        "Stone",
-        "Sphere",
-        "Cube",
-        "Artifact",
-        "Miscellaneous Item",
-        "Guild Crest",
-        "Treatise",
-        //
-        "Weapon",
-        "Armor",
-        "Shield",
-        "Head Protection",
-        "Hand Protection",
-        "Cloth",
-        "Foot Protection",
-        "Wrist Protection",
-        "Garment",
-        "Ornament",
-        "Liquid",
-        "Particles",
-        "Parchment",
-        "Book",
-        "Stick",
-        "Neck Ornament",
-        "Round Object",
-        "Square Object",
-        "Waist Protection",
-        "Old Object",
-        "Element",
-        "Glittering Object",
-        "Crest",
-        "Miscellaneous Object",
+    public static readonly Map<int, string> RESOURCE_TYPES = new() {
+        [47054] = "item 1",
+        [47056] = "item 2",
+        [49206] = "portrait 1",
     };
 
-    public class Item {
+    public class Resource {
         public string name = "";
-        public short idx;
-        public short att, def;
-
-        public int price; // negative -> cursed
-
-        //public bool cursed;
-        public Vector<short> statReq = new();
-        public Vector<short> statMod = new();
-        public short swings;
-        public float damMod; // ?? for non-weapons
-        public short d1;
-        public short hands;
-        public short type;
+        public int offset;
+        public int length;
+        public int type; // still unsure about this... what else could this be? size? bit mask?
 
         public override string ToString() {
-            return $"{name} {{{idx}}} A{att}/D{def} [{damMod}]x{swings} {hands}-handed {d1} {ITEM_TYPE_NAMES[type]} " +
-                $"req {statReq} mod {statMod}"; // + " ${cost}";
+            return @$"[{RESOURCE_TYPES[type] ?? "" + type}] {name} @ {offset} +{length}";
         }
+    }
+
+    public static void rol( ref uint n, int shift ) {
+        n = ( n << shift ) | ( n >> ( 32 - shift ) );
+    }
+
+    public static uint hashDER1( IEnumerable<byte> assetName, int seed ) {
+        uint esi = (uint)seed;
+        uint ecx = esi;
+        foreach ( byte b in assetName ) {
+            rol( ref ecx, 3 );
+            ecx ^= b;
+            ecx ^= esi;
+            //ecx ^= unchecked((int) 0xABCDABCD);
+            ecx ^= 0xABCDABCD;
+            esi = ecx;
+        }
+
+        return esi;
     }
 
     private void openDER( string filePath ) {
-        throw new NotImplementedException();
-    }
+        Console.Out.Write( filePath );
+        string fileNameNoExt = Path.GetFileNameWithoutExtension( filePath );
+        string path = Path.GetDirectoryName( filePath )
+            ?? throw new ArgumentException( $"invalid path '{filePath}'" );
+        byte[] bytes = File.ReadAllBytes( filePath );
+        Console.Out.Write( " =>" );
+        // all DER are alike
+        using MemoryStream ms = new( bytes );
+        using BinaryReader br = new( ms );
+        string magic = br.readString( 8 );
+        if ( magic != DER_1_3_MAGIC ) {
+            throw new FileFormatException();
+        }
 
-    private void xorMask( byte[] bytes, byte[] mask, int start, int end ) {
-        for ( int i = start; i < end; i++ ) {
-            bytes[i] ^= mask[( i - start ) % mask.Length];
+        int assetCatalogOffset = br.ReadInt32();
+        br.seek( assetCatalogOffset );
+        int assetCount = br.ReadInt32();
+        Console.Out.Write( $"useless int32: {br.ReadInt32()}" ); // check if always 0
+
+        Vector<Resource> resources = new();
+        for ( int i = 0; i < assetCount; i++ ) {
+            Resource res = new();
+            int nameLen = br.ReadInt32();
+            byte[] nameBytes = br.ReadBytes( nameLen ); // in-place on bytes[] is faster, but this is shorter
+            xorMask( nameBytes, DER_NAME_XOR_MASK1 );
+            if ( nameLen > DER_NAME_XOR_MASK1.Length ) { // happens seldom, but does happen indeed
+                xorMask( nameBytes, DER_NAME_XOR_MASK2, DER_NAME_XOR_MASK1.Length, nameBytes.Length ); // looped mask
+            }
+
+            res.name = nameBytes.toString();
+            res.offset = br.ReadInt32();
+            res.length = br.ReadInt32();
+            res.type = br.ReadInt32();
+
+            resources.Add( res );
+        }
+
+        //Directory.CreateDirectory( $"{path}/{fileNameNoExt}" );
+
+        var hash2 = hashDER1( Encoding.ASCII.GetBytes( fileNameNoExt.ToUpper() ), DER_XOR1_RESOURCE_FILE_NAME_SEED );
+
+        foreach ( Resource res in resources ) {
+            //Console.Out.WriteLine( res );
         }
     }
-    
-    public const int HEADER_END_OFFSET = 24;
 
     private void openDED( string filePath ) {
-        string fileName = Path.GetFileName( filePath );
-
         Console.Out.Write( filePath );
+        string fileName = Path.GetFileName( filePath );
         byte[] bytes = File.ReadAllBytes( filePath );
         //Stream fileStream = openFileDialog.OpenFile();
         //using BinaryReader reader = new( fileStream );
         //reader.ReadBytes( ... );
         Console.Out.Write( " =>" );
 
-        if ( CODED_DED_FILES.Contains( fileName ) ) {
+        if ( XORED_DED_FILES.Contains( fileName ) ) {
             //xorMask( bytes, DED_HEADER_XOR_MASK, 0, 24 );
             //xorMask( bytes, DED_XOR_MASK, 24, bytes.Length );
-            xorMask( bytes, DED_ASC_HEADER_XOR_MASK, 12, Math.Min( HEADER_END_OFFSET, bytes.Length ) );
-            xorMask( bytes, DED_ASC_XOR_MASK, HEADER_END_OFFSET, bytes.Length );
+            xorMask( bytes, DED_ASC_HEADER_XOR_MASK, 12, Math.Min( DED_HEADER_END_OFFSET, bytes.Length ) );
+            xorMask( bytes, DED_ASC_XOR_MASK, DED_HEADER_END_OFFSET, bytes.Length );
         }
 
         if ( fileName == "DEMISEItems.DED" ) {
