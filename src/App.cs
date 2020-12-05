@@ -2,7 +2,7 @@ namespace DemiseTheReversation {
 
 using System.Windows.Forms;
 
-static class Program {
+static class App {
     /// <summary>
     ///  The main entry point for the application.
     /// </summary>

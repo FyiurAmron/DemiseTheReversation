@@ -9,8 +9,8 @@ using System.Linq;
 public class SortedMap<TKey, TValue> : SortedDictionary<TKey, TValue> where TKey : notnull {
     // public SortedMap () : base() { }
     
-    public new TValue? this[ TKey key ] {
-        get => TryGetValue( key, out TValue? val ) ? val : default;
+    public new TValue this[ TKey key ] {
+        get => TryGetValue( key, out TValue val ) ? val : default;
         set => base[key] = value!;
     }
 

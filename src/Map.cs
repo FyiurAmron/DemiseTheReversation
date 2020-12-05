@@ -9,8 +9,8 @@ using System.Linq;
 public class Map<TKey, TValue> : Dictionary<TKey, TValue> where TKey : notnull {
     // public Map () : base() { }
 
-    public new TValue? this[ TKey key ] {
-        get => TryGetValue( key, out TValue? val ) ? val : default;
+    public new TValue this[ TKey key ] {
+        get => TryGetValue( key, out TValue val ) ? val : default;
         set => base[key] = value!;
     }
 

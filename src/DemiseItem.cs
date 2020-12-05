@@ -3,7 +3,7 @@ namespace DemiseTheReversation {
 using static DemiseConsts;
 
 public class Item {
-    public string name = "";
+    public string name;
     public short idx;
     public short att, def;
 

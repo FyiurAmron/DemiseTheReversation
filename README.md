@@ -54,8 +54,8 @@ rol = (x, shift) => ( x << shift ) | ( x >>> ( 32 - shift ) );
 zlib stream XOR:
 ```
 str = 'intro.des' // asset name, str2 = 'DEMISESOUNDFX' (fname caps no ext)
-xor0 = (str) => {
-    esi = 0x00091C80; // esi = 0x000A2F3B;
+esi = seed
+xor0 = (str, seed) => {
     ecx = esi;
     for( i = 0; i < str.length; i++ ) {
         rol( ecx, 3 );
@@ -67,19 +67,23 @@ xor0 = (str) => {
     }
     return esi;
 };
-// str1 (asset name 'intro.des') -> 0xFB344021
-// str2 (DER NAME CAPS NO EXT 'DEMISESOUNDFX')-> 0xD800FB0F
-// mul = strHash1 * strHash2 // 0xCAF01CEF
-// mul += 4
-// mul ^= 0x00019871 // CAF18482
-// -> [E435CD0] ->
+// esi = 0x00091C80; // seed 1
+// esi = 0x000A2F3B; // seed 2
+// strHash1 (asset name 'intro.des') -> 0xFB344021
+// strHash2 (DER NAME CAPS NO EXT 'DEMISESOUNDFX')-> 0xD800FB0F
+hash = strHash1 * strHash2 // 0xCAF01CEF
+hash += 4
+hash ^= 0x00019871 // CAF18482
+tmp = hash
 for( i = 0; i < 0x200; i++ ) {
-// mul *= 0x0343FD; // 53E3FA7A
-// mul += 0x0269EC3; // 540A993D // 5[40]A993D -> al
-// mul -> [E435CD0]
-  mul <<= 9;
-  mul >>= 30; // 16+4+1
-  // mul &= 0x7FFF; // mul >>= 4; 
+  tmp *= 0x0343FD; // 53E3FA7A
+  tmp += 0x0269EC3; // 540A993D // 5[40]A993D -> al
+  hash = tmp
+  // simplified all the mul &= 0x7FFF; mul >>= 4; etc. code
+  hash <<= 4;
+  hash >>= 24;
+  hash ^= 0xE3;
+  
   xorMask[i] = al;
 }
 return xorMask;
@@ -171,3 +175,11 @@ ecx = rol ebx, 3 = 0b 101011100100110101011101 11001101
 ror( 0xCD, 3 ) ^ 0xCD = 0x74 // possible since 3 MSB (101) in 3rd val are equal to its bits 8-6 anyway
 ```
 --------------------
+
+DES -> MS Wave (.WAV)
+
+TODO:
+
+DET (Texture)
+DEO (3D Object)
+DEA (Animation)
