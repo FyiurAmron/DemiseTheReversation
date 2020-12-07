@@ -11,6 +11,55 @@ using System.Text;
 using System.Windows.Forms;
 using Encoder = System.Drawing.Imaging.Encoder;
 
+public static class Misc {
+    public static void applyXorMask( byte[] bytes, byte[] mask, int start = 0, int? end = null ) {
+        end ??= Math.Min( mask.Length + start, bytes.Length );
+
+        for ( int i = start; i < end; i++ ) {
+            bytes[i] ^= mask[( i - start ) % mask.Length];
+        }
+    }
+
+    public static void rol( ref uint n, int shift ) {
+        n = ( n << shift ) | ( n >> ( 32 - shift ) );
+    }
+
+    public static byte[] inflate( Stream deflatedInput, int bufSize ) {
+        DeflateStream ds = new( deflatedInput, CompressionMode.Decompress );
+        byte[] bytes = new byte[bufSize];
+        ds.Read( bytes );
+        return bytes;
+    }
+
+    public static byte[] inflateZlibBytes( byte[] zlibDeflatedBytes, int bufSize ) {
+        using MemoryStream deflatedInput = new( zlibDeflatedBytes, 2, zlibDeflatedBytes.Length - 2 );
+        // offsets to skip zlib header (2 bytes) & ADLER32 CRC footer (4 bytes)
+        return inflate( deflatedInput, bufSize );
+    }
+
+    public static Encoding defaultEncoding { get; set; } = Encoding.ASCII;
+}
+
+public static class Bits {
+    public static byte[] argb1555ToBytes( byte b1, byte b2 ) {
+        return new[] {
+            (byte) ( b1 & 0b1000_0000 ),
+            (byte) ( ( b1 & 0b0111_1100 ) << 1 ),
+            (byte) ( ( ( b1 & 0b0000_0011 ) << 6 ) | ( ( b2 & 0b1110_0000 ) >> 2 ) ),
+            (byte) ( ( b2 & 0b0001_1111 ) << 3 )
+        };
+    }
+
+    public static (byte, byte) bytesToArgb1555( byte[] bytes ) {
+        byte b1 = bytes[0];
+        b1 |= (byte) ( bytes[1] >> 1 );
+        b1 |= (byte) ( bytes[2] >> 6 );
+        byte b2 = (byte) ( bytes[2] << 2 );
+        b2 |= (byte) ( bytes[3] >> 3 );
+        return ( b1, b2 );
+    }
+}
+
 // simple animation code for WinForms courtesy of Hans Passant
 /*
 // usage:
@@ -66,35 +115,6 @@ public static class AnimImage {
         };
         ctl.Disposed += ( _, _ ) => tmr.Dispose();
     }
-}
-
-public static class Misc {
-    public static void applyXorMask( byte[] bytes, byte[] mask, int start = 0, int? end = null ) {
-        end ??= Math.Min( mask.Length + start, bytes.Length );
-
-        for ( int i = start; i < end; i++ ) {
-            bytes[i] ^= mask[( i - start ) % mask.Length];
-        }
-    }
-
-    public static void rol( ref uint n, int shift ) {
-        n = ( n << shift ) | ( n >> ( 32 - shift ) );
-    }
-
-    public static byte[] inflate( Stream deflatedInput, int bufSize ) {
-        DeflateStream ds = new( deflatedInput, CompressionMode.Decompress );
-        byte[] bytes = new byte[bufSize];
-        ds.Read( bytes );
-        return bytes;
-    }
-
-    public static byte[] inflateZlibBytes( byte[] zlibDeflatedBytes, int bufSize ) {
-        using MemoryStream deflatedInput = new( zlibDeflatedBytes, 2, zlibDeflatedBytes.Length - 2 );
-        // offsets to skip zlib header (2 bytes) & ADLER32 CRC footer (4 bytes)
-        return inflate( deflatedInput, bufSize );
-    }
-
-    public static Encoding defaultEncoding { get; set; } = Encoding.ASCII;
 }
 
 public static class MenuExtensions {

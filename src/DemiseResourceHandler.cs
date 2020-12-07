@@ -3,6 +3,7 @@ namespace DemiseTheReversation {
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Windows.Forms;
 using static DemiseConsts;
 using static Misc;
 
@@ -21,14 +22,21 @@ public class DemiseResourceHandler : IDemiseFileHandler {
         return (int) esi;
     }
 
-    private string path = "";
-    private string fileNameNoExt = "";
+    private string path;
+    private string fileNameNoExt;
     private readonly Map<string, DemiseResource> resources = new();
     private byte[] derBytes = Array.Empty<byte>();
     private int hash2;
 
+    private readonly AutoForm parent;
+
+    public DemiseResourceHandler( AutoForm parent ) {
+        this.parent = parent;
+    }
+
     public void open( string filePath ) {
         Console.Out.Write( filePath );
+        string fileName = Path.GetFileName( filePath );
         fileNameNoExt = Path.GetFileNameWithoutExtension( filePath );
         path = Path.GetDirectoryName( filePath )
             ?? throw new ArgumentException( $"invalid path '{filePath}'" );
@@ -53,6 +61,19 @@ public class DemiseResourceHandler : IDemiseFileHandler {
             throw new FileFormatException();
         }
         */
+
+        AutoForm previewForm = new( mdiParent: parent ) {
+            Text = fileName
+        };
+
+        ListBox listBox = new() {
+            AutoSize = true,
+            MaximumSize = new( 800, 800 ),
+            ScrollAlwaysVisible = true,
+        };
+        listBox.BeginUpdate();
+
+        previewForm.autoControls.Add( listBox );
 
         //byte[] xorMask = new byte[0x200]; // 512
         for ( int i = 0; i < assetCount; i++ ) {
@@ -81,7 +102,13 @@ public class DemiseResourceHandler : IDemiseFileHandler {
             Console.Out.WriteLine( res );
 
             resources.Add( res.name, res );
+
+            listBox.Items.Add( res.name );
         }
+
+        listBox.EndUpdate();
+
+        previewForm.Show();
     }
 
     public void unpack() {
