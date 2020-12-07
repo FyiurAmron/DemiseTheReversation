@@ -2,10 +2,71 @@ namespace DemiseTheReversation {
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Encoder = System.Drawing.Imaging.Encoder;
+
+// simple animation code for WinForms courtesy of Hans Passant
+/*
+// usage:
+pictureBox1.Image = CreateAnimation( pictureBox1,
+    new Image[] { Properties.Resources.Frame1, Properties.Resources.Frame2, Properties.Resources.Frame3 },
+    new int[] { 1000, 2000, 300 }
+);
+*/
+public static class AnimImage {
+    public static Image createAnimation( Control ctl, Image[] frames, int[] delays ) {
+        var ms = new MemoryStream();
+        var codec = ImageCodecInfo.GetImageEncoders().First( i => i.MimeType == "image/tiff" );
+
+        EncoderParameters encoderParameters = new( 2 ) {
+            Param = {
+                [0] = new EncoderParameter( Encoder.SaveFlag, (long) EncoderValue.MultiFrame ),
+                [1] = new EncoderParameter( Encoder.Quality, (long) EncoderValue.CompressionLZW )
+            }
+        };
+        frames[0].Save( ms, codec, encoderParameters );
+
+        encoderParameters = new EncoderParameters( 1 ) {
+            Param = {[0] = new EncoderParameter( Encoder.SaveFlag, (long) EncoderValue.FrameDimensionPage )}
+        };
+        for ( int i = 1; i < frames.Length; i++ ) {
+            frames[0].SaveAdd( frames[i], encoderParameters );
+        }
+
+        encoderParameters.Param[0] = new EncoderParameter( Encoder.SaveFlag, (long) EncoderValue.Flush );
+        frames[0].SaveAdd( encoderParameters );
+
+        ms.Position = 0;
+        Image img = Image.FromStream( ms );
+        animate( ctl, img, delays );
+        return img;
+    }
+
+    private static void animate( Control ctl, Image img, int[] delays ) {
+        int frame = 0;
+        var tmr = new Timer() {
+            Interval = delays[0],
+            Enabled = true
+        };
+        tmr.Tick += ( _, _ ) => {
+            frame++;
+            if ( frame >= delays.Length ) {
+                frame = 0;
+            }
+
+            img.SelectActiveFrame( FrameDimension.Page, frame );
+            tmr.Interval = delays[frame];
+            ctl.Invalidate();
+        };
+        ctl.Disposed += ( _, _ ) => tmr.Dispose();
+    }
+}
 
 public static class Misc {
     public static void applyXorMask( byte[] bytes, byte[] mask, int start = 0, int? end = null ) {
@@ -45,6 +106,24 @@ public static class MenuExtensions {
 public static class StringExtensions {
     public static byte[] toBytes( this string s, Encoding encoding = null ) {
         return ( encoding ?? Misc.defaultEncoding ).GetBytes( s );
+    }
+
+    public static string join( this IEnumerable<string> strings, string separator ) {
+        return string.Join( separator, strings );
+    }
+
+    public static StringBuilder appendAll( this StringBuilder sb, IEnumerable<string> strings ) {
+        strings.forEach( ( s ) => sb.Append( s ) );
+
+        return sb;
+    }
+}
+
+public static class IEnumerableExtensions {
+    public static void forEach<T>( this IEnumerable<T> iEnumerable, Action<T> action ) {
+        foreach ( T t in iEnumerable ) {
+            action( t );
+        }
     }
 }
 

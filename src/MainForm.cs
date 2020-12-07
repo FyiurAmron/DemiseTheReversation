@@ -1,24 +1,59 @@
+using System;
+using System.IO;
+
 namespace DemiseTheReversation {
 
 using System.Windows.Forms;
 using System.IO;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
+using System.Text;
 using static DemiseConsts;
 using static Misc;
 
 public partial class MainForm : Form {
     private IDemiseFileHandler currentFileHandler;
+    private ScrollableControl panel;
 
     public MainForm() {
-        InitializeComponent();
+        InitializeComponent(); // needed for Designer
 
-        createMenus();
+        SuspendLayout();
+
+        AutoSize = true;
+        // AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        AutoSizeMode = AutoSizeMode.GrowOnly;
+        // FormBorderStyle = FormBorderStyle.Sizable;
+
+        FlowLayoutPanel flPanel = new();
+        flPanel.BackColor = Color.Indigo;
+        panel = flPanel;
+
+        flPanel.AutoSize = true;
+        flPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        flPanel.Dock = DockStyle.Top;
+        // flPanel.AutoScroll = true;
+
+        if ( panel != this ) {
+            Controls.Add( panel );
+        }
+
+        // fileOpenEventHandler( null, null );
+
+        MainMenuStrip = createMenus();
+        MainMenuStrip.Dock = DockStyle.Top;
+        Controls.Add( MainMenuStrip ); // has to be added last to order the docks properly
+
+        ResumeLayout();
     }
 
-    private void createMenus() {
-        MenuStrip ms = new();
+    private MenuStrip createMenus() {
+        MenuStrip ms = new() {
+            RenderMode = ToolStripRenderMode.System
+        };
 
         ToolStripMenuItem fileOpenMenuItem = new(
             "Open", null, fileOpenEventHandler, Keys.Control | Keys.O );
@@ -36,14 +71,24 @@ public partial class MainForm : Form {
 
         ms.Items.Add( fileMenu );
 
-        MainMenuStrip = ms;
-        Controls.Add( ms );
+        return ms;
+    }
+
+    private static string createFilterString() {
+        string[] keys = FILE_TYPES.Keys.Select( ( s ) => "*." + s ).ToArray();
+
+        StringBuilder sb = new();
+        sb
+            .Append( $"Demise assets ({keys.join( ", " )})|{keys.join( ";" )}|" )
+            .appendAll( FILE_TYPES.Select( ( kv ) => $"{kv.Value} (*.{kv.Key})|*.{kv.Key}|" ) )
+            .Append( "All files (*.*)|*.*" );
+
+        return sb.ToString();
     }
 
     private void fileOpenEventHandler( object sender, EventArgs eventArgs ) {
         using OpenFileDialog openFileDialog = new() {
-            Filter =
-                @"Demise assets (*.DED, *.DER)|*.DED;*.DER|DED files (*.DED)|*.DED|DER files (*.DER)|*.DER|All files (*.*)|*.*",
+            Filter = createFilterString()
         };
 
         if ( openFileDialog.ShowDialog() != DialogResult.OK ) {
@@ -51,17 +96,15 @@ public partial class MainForm : Form {
         }
 
         string filePath = openFileDialog.FileName;
-        string ext = Path.GetExtension( filePath );
+        string ext = Path.GetExtension( filePath ).Substring( 1 ).ToUpper();
 
-        FileType ft = openFileDialog.FilterIndex switch {
-            2 => FileType.DED,
-            3 => FileType.DER,
-            _ => ext switch {
-                ".DED" => FileType.DED,
-                ".DER" => FileType.DER,
-                _ => throw new ArgumentException( $"unknown extension '{ext}'" )
-            }
-        };
+        int idx = openFileDialog.FilterIndex;
+        FileType ft; // sadly, no way to genericize enum handling here
+        if ( Enum.IsDefined( typeof(FileType), idx ) && idx > (int) FileType.DEMISE ) {
+            ft = (FileType) idx;
+        } else if ( !Enum.TryParse( ext, out ft ) || ft <= FileType.DEMISE ) {
+            throw new ArgumentException( $"unknown extension '{ext}'" );
+        }
 
         switch ( ft ) {
             case FileType.DED:
@@ -72,7 +115,113 @@ public partial class MainForm : Form {
                 currentFileHandler.open( filePath );
                 currentFileHandler.unpack(); // TODO activate this via menu/button
                 break;
+            case FileType.DEA:
+                openDEA( filePath );
+                break;
         }
+    }
+
+    private byte[] argb1555ToBytes( byte b1, byte b2 ) {
+        return new[] {
+            (byte) ( b1 & 0b1000_0000 ),
+            (byte) ( ( b1 & 0b0111_1100 ) << 1 ),
+            (byte) ( ( ( b1 & 0b0000_0011 ) << 6 ) | ( ( b2 & 0b1110_0000 ) >> 2 ) ),
+            (byte) ( ( b2 & 0b0001_1111 ) << 3 )
+        };
+    }
+
+    private (byte, byte) bytesToArgb1555( byte[] bytes ) {
+        byte b1 = bytes[0];
+        b1 |= (byte) ( bytes[1] >> 1 );
+        b1 |= (byte) ( bytes[2] >> 6 );
+        byte b2 = (byte) ( bytes[2] << 2 );
+        b2 |= (byte) ( bytes[3] >> 3 );
+        return ( b1, b2 );
+    }
+
+    private void openDEA( string filePath ) {
+        Console.Out.Write( filePath );
+        string fileName = Path.GetFileName( filePath );
+        byte[] sourceArray = File.ReadAllBytes( filePath );
+
+        using MemoryStream ms = new( sourceArray );
+        using BinaryReader br = new( ms );
+
+        string magic = br.readString( 8 );
+        if ( magic != IWA_1_2_MAGIC && magic != DEA_1_2_MAGIC ) {
+            throw new FileFormatException();
+        }
+
+        int width = br.ReadInt32(); // + 1;
+        int height = br.ReadInt32();
+        int delayMs = br.ReadInt32();
+        int frameCount = br.ReadInt32();
+        int notBook = br.ReadInt32(); // 0 for books, 1 for other
+
+        long sourceIndex = ms.Position; // int really
+        long bmpLen = sourceArray.Length - sourceIndex; // ditto
+        int frameLength = width * height * sizeof(short);
+        byte[][] bmpBytes = new byte[frameCount][];
+        bmpBytes[0] = new byte[frameLength];
+        Array.Copy( sourceArray, sourceIndex, bmpBytes[0], 0, frameLength );
+        long srcPtr = sourceIndex + frameLength;
+        for ( int i = 1; i < frameCount; i++ ) {
+            Console.Out.WriteLine();
+            bmpBytes[i] = new byte[frameLength];
+            Array.Copy( bmpBytes[i - 1], bmpBytes[i], frameLength );
+            for ( int j = 0; j < frameLength; j += 2, srcPtr += 2 ) {
+                short prev = (short) ( ( bmpBytes[i][j + 1] << 8 ) | bmpBytes[i][j] );
+                short mods = (short) ( ( sourceArray[srcPtr + 1] << 8 ) | sourceArray[srcPtr] );
+                prev += mods;
+                bmpBytes[i][j] = (byte) prev;
+                bmpBytes[i][j + 1] = (byte) ( prev >> 8 );
+            }
+        }
+
+        Console.Out.WriteLine( $"{srcPtr} -> {sourceArray.Length}" );
+
+        PictureBox animPb = new() {
+            SizeMode = PictureBoxSizeMode.AutoSize
+        };
+        panel.Controls.Add( animPb );
+
+        Bitmap[] frames = new Bitmap[frameCount * 2];
+        int[] delays = new int[frameCount * 2];
+
+        void addPictureBox( int i ) {
+            Bitmap bmp = new( width, height, // 0,
+                              PixelFormat.Format16bppArgb1555 //,
+                // Marshal.UnsafeAddrOfPinnedArrayElement( bmpBytes, 0 )
+            );
+
+            Rectangle BoundsRect = new( 0, 0, width, height );
+            BitmapData bmpData = bmp.LockBits( BoundsRect, ImageLockMode.WriteOnly, bmp.PixelFormat );
+            IntPtr ptr = bmpData.Scan0;
+
+            System.Runtime.InteropServices.Marshal.Copy( bmpBytes[i], 0, ptr, bmpBytes[0].Length );
+            bmp.UnlockBits( bmpData );
+
+            frames[i] = bmp;
+            frames[frameCount * 2 - i - 1] = bmp;
+            delays[i] = delayMs;
+            delays[frameCount * 2 - i - 1] = delayMs;
+
+            PictureBox pb = new() {
+                Image = bmp,
+                SizeMode = PictureBoxSizeMode.AutoSize
+            };
+
+            panel.Controls.Add( pb );
+        }
+
+        SuspendLayout();
+        for ( int i = 0; i < frameCount; i++ ) {
+            addPictureBox( i );
+        }
+
+        animPb.Image = AnimImage.createAnimation( animPb, frames, delays );
+
+        ResumeLayout();
     }
 
     private void openDED( string filePath ) {

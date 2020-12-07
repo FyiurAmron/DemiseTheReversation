@@ -1,12 +1,21 @@
 namespace DemiseTheReversation {
 
-public class DemiseConsts {
+public static class DemiseConsts {
     public enum FileType {
-        DED = 1,
-        DER = 2,
+        ALL, // meta-value, don't handle directly
+        DEMISE, // ditto; leave those 2 on the top please
+        DED,
+        DER,
+        DEA
     }
+    
+    public static readonly SortedMap<FileType, string> FILE_TYPES = new() {
+        [FileType.DED] = "Demise Data",
+        [FileType.DER] = "Demise Resource",
+        [FileType.DEA] = "Demise Animation",
+    };
 
-    public static string[] XORED_DED_FILES = {
+    public static readonly string[] XORED_DED_FILES = {
         "DEMISETextures.DED",
         "DEMISEBountyData.DED",
         "DEMISEData.DED",
@@ -87,6 +96,9 @@ public class DemiseConsts {
         0x74,
     };
 
+    public const string IWA_1_2_MAGIC = "IWAv1.2\0";
+    public const string DEA_1_2_MAGIC = "DEAv1.2\0";
+    
     public const string DER_1_3_MAGIC = "DERv1.3\0";
 
     public const int DER_XOR1_ASSET_NAME_SEED = 0x0009_1C80;
