@@ -1,6 +1,5 @@
-namespace DemiseTheReversation {
+namespace DemiseTheReversation.FormUtils {
 
-using System;
 using System.Windows.Forms;
 
 public class AutoForm : Form {
@@ -14,6 +13,7 @@ public class AutoForm : Form {
     public MenuStrip menuStrip { get; }
     public FlowLayoutPanel flowLayoutPanel { get; }
 
+    // ReSharper disable once InconsistentNaming
     public new Form MdiParent {
         get => base.MdiParent;
         private init => base.MdiParent = value;

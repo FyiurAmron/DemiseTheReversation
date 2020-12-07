@@ -2,7 +2,7 @@ namespace DemiseTheReversation {
 
 using System;
 using System.IO;
-using static Misc;
+using Utils;
 
 public class DemiseResource {
     public string name { get; init; }
@@ -41,7 +41,7 @@ public class DemiseResource {
             esi ^= xorMask[xorMaskIdx];
         }
 
-        bytes = inflateZlibBytes( bytes, realSize );
+        bytes = Zlib.inflateZlibBytes( bytes, realSize );
     }
 
     public override string ToString() {

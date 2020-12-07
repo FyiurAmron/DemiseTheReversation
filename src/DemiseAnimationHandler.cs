@@ -5,6 +5,8 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
+using FormUtils;
+using Utils;
 
 public class DemiseAnimationHandler : IDemiseFileHandler {
     private readonly AutoForm parent;
@@ -78,8 +80,8 @@ public class DemiseAnimationHandler : IDemiseFileHandler {
                 // Marshal.UnsafeAddrOfPinnedArrayElement( bmpBytes, 0 )
             );
 
-            Rectangle BoundsRect = new( 0, 0, width, height );
-            BitmapData bmpData = bmp.LockBits( BoundsRect, ImageLockMode.WriteOnly, bmp.PixelFormat );
+            Rectangle boundsRect = new( 0, 0, width, height );
+            BitmapData bmpData = bmp.LockBits( boundsRect, ImageLockMode.WriteOnly, bmp.PixelFormat );
             IntPtr ptr = bmpData.Scan0;
 
             System.Runtime.InteropServices.Marshal.Copy( bmpBytes[i], 0, ptr, bmpBytes[0].Length );

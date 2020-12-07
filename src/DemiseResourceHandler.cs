@@ -4,15 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
+using FormUtils;
+using Utils;
 using static DemiseConsts;
-using static Misc;
 
 public class DemiseResourceHandler : IDemiseFileHandler {
     private static int calcHash( IEnumerable<byte> assetName, uint seed ) {
         uint esi = seed;
         uint ecx = esi;
         foreach ( byte b in assetName ) {
-            rol( ref ecx, 3 );
+            Bits.rol( ref ecx, 3 );
             ecx ^= b;
             ecx ^= esi;
             ecx ^= 0xABCD_ABCD;
@@ -63,12 +64,12 @@ public class DemiseResourceHandler : IDemiseFileHandler {
         */
 
         AutoForm previewForm = new( mdiParent: parent ) {
-            Text = fileName
+            Text = fileName,
         };
 
         ListBox listBox = new() {
             AutoSize = true,
-            MaximumSize = new( 800, 800 ),
+            MaximumSize = new( 750, 500 ),
             ScrollAlwaysVisible = true,
         };
         listBox.BeginUpdate();
@@ -79,10 +80,10 @@ public class DemiseResourceHandler : IDemiseFileHandler {
         for ( int i = 0; i < assetCount; i++ ) {
             int nameLen = br.ReadInt32();
             byte[] nameBytes = br.ReadBytes( nameLen ); // in-place on bytes[] is faster, but this is shorter
-            applyXorMask( nameBytes, DER_NAME_XOR_MASK1 );
+            Bits.applyXorMask( nameBytes, DER_NAME_XOR_MASK1 );
             if ( nameLen > DER_NAME_XOR_MASK1.Length ) { // happens seldom, but does happen indeed
-                applyXorMask( nameBytes, DER_NAME_XOR_MASK2, DER_NAME_XOR_MASK1.Length,
-                              nameBytes.Length ); // looped mask
+                Bits.applyXorMask( nameBytes, DER_NAME_XOR_MASK2, DER_NAME_XOR_MASK1.Length,
+                                   nameBytes.Length ); // looped mask
             }
 
             int hash1 = calcHash( nameBytes, DER_XOR1_ASSET_NAME_SEED );

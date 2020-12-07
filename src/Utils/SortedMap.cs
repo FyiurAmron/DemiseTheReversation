@@ -1,14 +1,14 @@
-﻿namespace DemiseTheReversation {
+namespace DemiseTheReversation.Utils {
 
 using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// custom version of Dictionary
+/// custom version of SortedDictionary
 /// </summary>
-public class Map<TKey, TValue> : Dictionary<TKey, TValue> where TKey : notnull {
-    // public Map () : base() { }
-
+public class SortedMap<TKey, TValue> : SortedDictionary<TKey, TValue> where TKey : notnull {
+    // public SortedMap () : base() { }
+    
     public new TValue this[ TKey key ] {
         get => TryGetValue( key, out TValue val ) ? val : default;
         set => base[key] = value!;

@@ -1,4 +1,4 @@
-namespace DemiseTheReversation {
+namespace DemiseTheReversation.Utils {
 
 using System;
 using System.Collections.Generic;
@@ -12,18 +12,10 @@ using System.Windows.Forms;
 using Encoder = System.Drawing.Imaging.Encoder;
 
 public static class Misc {
-    public static void applyXorMask( byte[] bytes, byte[] mask, int start = 0, int? end = null ) {
-        end ??= Math.Min( mask.Length + start, bytes.Length );
+    public static Encoding defaultEncoding { get; set; } = Encoding.ASCII;
+}
 
-        for ( int i = start; i < end; i++ ) {
-            bytes[i] ^= mask[( i - start ) % mask.Length];
-        }
-    }
-
-    public static void rol( ref uint n, int shift ) {
-        n = ( n << shift ) | ( n >> ( 32 - shift ) );
-    }
-
+public static class Zlib {
     public static byte[] inflate( Stream deflatedInput, int bufSize ) {
         DeflateStream ds = new( deflatedInput, CompressionMode.Decompress );
         byte[] bytes = new byte[bufSize];
@@ -36,8 +28,6 @@ public static class Misc {
         // offsets to skip zlib header (2 bytes) & ADLER32 CRC footer (4 bytes)
         return inflate( deflatedInput, bufSize );
     }
-
-    public static Encoding defaultEncoding { get; set; } = Encoding.ASCII;
 }
 
 public static class Bits {
@@ -57,6 +47,18 @@ public static class Bits {
         byte b2 = (byte) ( bytes[2] << 2 );
         b2 |= (byte) ( bytes[3] >> 3 );
         return ( b1, b2 );
+    }
+
+    public static void applyXorMask( byte[] bytes, byte[] mask, int start = 0, int? end = null ) {
+        end ??= Math.Min( mask.Length + start, bytes.Length );
+
+        for ( int i = start; i < end; i++ ) {
+            bytes[i] ^= mask[( i - start ) % mask.Length];
+        }
+    }
+
+    public static void rol( ref uint n, int shift ) {
+        n = ( n << shift ) | ( n >> ( 32 - shift ) );
     }
 }
 
@@ -82,7 +84,7 @@ public static class AnimImage {
         frames[0].Save( ms, codec, encoderParameters );
 
         encoderParameters = new EncoderParameters( 1 ) {
-            Param = {[0] = new EncoderParameter( Encoder.SaveFlag, (long) EncoderValue.FrameDimensionPage )}
+            Param = { [0] = new EncoderParameter( Encoder.SaveFlag, (long) EncoderValue.FrameDimensionPage ) }
         };
         for ( int i = 1; i < frames.Length; i++ ) {
             frames[0].SaveAdd( frames[i], encoderParameters );
@@ -118,8 +120,8 @@ public static class AnimImage {
 }
 
 public static class MenuExtensions {
-    public static void add( this ToolStripItemCollection tsic, params ToolStripItem[] items ) {
-        tsic.AddRange( items );
+    public static void add( this ToolStripItemCollection toolStripItemCollection, params ToolStripItem[] items ) {
+        toolStripItemCollection.AddRange( items );
     }
 }
 

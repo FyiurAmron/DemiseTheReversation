@@ -6,8 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using FormUtils;
+using Utils;
 using static DemiseConsts;
-using static Misc;
 
 // sadly, the designer doesn't work ATM for derived classes
 public partial class MainForm : AutoForm {
@@ -112,8 +113,8 @@ public partial class MainForm : AutoForm {
         if ( XORED_DED_FILES.Contains( fileName ) ) {
             //xorMask( bytes, DED_HEADER_XOR_MASK, 0, 24 );
             //xorMask( bytes, DED_XOR_MASK, 24, bytes.Length );
-            applyXorMask( bytes, DED_ASC_HEADER_XOR_MASK, 12, Math.Min( DED_HEADER_END_OFFSET, bytes.Length ) );
-            applyXorMask( bytes, DED_ASC_XOR_MASK, DED_HEADER_END_OFFSET, bytes.Length );
+            Bits.applyXorMask( bytes, DED_ASC_HEADER_XOR_MASK, 12, Math.Min( DED_HEADER_END_OFFSET, bytes.Length ) );
+            Bits.applyXorMask( bytes, DED_ASC_XOR_MASK, DED_HEADER_END_OFFSET, bytes.Length );
         }
 
         if ( fileName == "DEMISEItems.DED" ) {

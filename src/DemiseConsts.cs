@@ -1,5 +1,7 @@
 namespace DemiseTheReversation {
 
+using Utils;
+
 public static class DemiseConsts {
     public enum FileType {
         ALL, // meta-value, don't handle directly

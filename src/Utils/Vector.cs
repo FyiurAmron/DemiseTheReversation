@@ -1,4 +1,4 @@
-namespace DemiseTheReversation {
+namespace DemiseTheReversation.Utils {
 
 using System.Collections.Generic;
 

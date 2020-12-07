@@ -1,4 +1,4 @@
-namespace DemiseTheReversation {
+namespace DemiseTheReversation.FormUtils {
 
 using System;
 using System.Windows.Forms;
