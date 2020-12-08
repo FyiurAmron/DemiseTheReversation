@@ -6,6 +6,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using Utils;
 
+// TODO check guildlogbook.dea && guildlibrary.dea for possible quirks/errors/bugs
 public class DemiseAnimation : IDemiseAsset {
     public const string IWA_1_2_MAGIC = "IWAv1.2\0";
     public const string DEA_1_2_MAGIC = "DEAv1.2\0";
@@ -40,8 +41,8 @@ public class DemiseAnimation : IDemiseAsset {
         frameCount = br.ReadInt32();
         notBook = br.ReadInt32();
 
-        // long bmpLen = sourceArray.Length - sourceIndex; // ditto
-        int frameLength = width * height * sizeof(short);
+        int strideWidth = ( width + 1 ) / 2 * 2;
+        int frameLength = strideWidth * height * sizeof(short);
         bmpBytes = new byte[frameCount][];
         bmpBytes[0] = new byte[frameLength];
         br.Read( bmpBytes[0] );
