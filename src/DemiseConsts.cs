@@ -3,6 +3,8 @@ namespace DemiseTheReversation {
 using Utils;
 
 public static class DemiseConsts {
+    // TODO move to (I)Demise(Asset/FileHandler)
+    
     public enum FileType {
         ALL, // meta-value, don't handle directly
         DEMISE, // ditto; leave those 2 on the top please
@@ -16,6 +18,8 @@ public static class DemiseConsts {
         [FileType.DER] = "DEmise Resource archive",
         [FileType.DEA] = "DEmise Animation",
     };
+    
+    // TODO move to DemiseDataHandler
 
     public static readonly string[] XORED_DED_FILES = {
         "DEMISETextures.DED",
@@ -68,6 +72,8 @@ public static class DemiseConsts {
         "DEMISEAutomapAnnotations.DED",
         "DEMISEAutomapAnnotationsIndex.DED",
     };
+    
+    // TODO move to DemiseDataHandler
 
     public static readonly byte[] DED_HEADER_XOR_MASK = {
         0xA7, 0x8F, 0x56, 0xFD, 0x3E, 0x1D, 0x7C, 0xBD, 0xDC, 0xE6, 0xBE, 0x6D,
@@ -88,6 +94,8 @@ public static class DemiseConsts {
     };
 
     public const int DED_HEADER_END_OFFSET = 24;
+    
+    // TODO move to DemiseItem
     
     public const int STAT_IDX_MAX = 6;
 

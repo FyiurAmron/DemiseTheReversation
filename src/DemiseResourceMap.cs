@@ -1,6 +1,5 @@
 namespace DemiseTheReversation {
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -64,7 +63,6 @@ public class DemiseResourceMap : IEnumerable<DemiseResource>, IDemiseAsset {
             throw new FileFormatException();
         }
 
-        //byte[] xorMask = new byte[0x200]; // 512
         int hash2 = calcHash( fileUtil.nameNoExt.ToUpper().toBytes(), DER_XOR1_DER_NAME_SEED );
 
         for ( int i = 0; i < assetCount; i++ ) {
