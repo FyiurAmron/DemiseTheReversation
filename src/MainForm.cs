@@ -72,7 +72,7 @@ public partial class MainForm : AutoForm {
         };
 
         if ( openFileDialog.ShowDialog() != DialogResult.OK ) {
-            return;
+            return; // cancel
         }
 
         string filePath = openFileDialog.FileName;

@@ -22,6 +22,8 @@ public class AutoForm : Form {
     public AutoForm( bool hasMenu = true, Form mdiParent = null, bool hasFlowLayout = true ) {
         SuspendLayout();
 
+        // Font = new Font( new FontFamily( "Microsoft Sans Serif" ), 8f );
+
         MdiParent = mdiParent;
 
         AutoSize = true;
