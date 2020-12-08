@@ -22,13 +22,20 @@ public abstract class DemiseFileHandler<T> : IDemiseFileHandler where T : IDemis
     }
 
     protected void addDefaultMenuAndShow() {
-        ToolStripMenuItemEx actionOpenMenuItem = new( ( _, _ ) => unpack() ) {
-            Text = @$"&Unpack {fileUtil.name}",
+        ToolStripMenuItemEx actionUnpackMenuItem = new( ( _, _ ) => unpack( fileUtil.pathNameNoExt ) ) {
+            Text = @$"&Unpack {fileUtil.name} to {fileUtil.pathNameNoExt}",
             ShortcutKeys = Keys.Control | Keys.U,
+        };
+        ToolStripMenuItemEx actionUnpackAsMenuItem = new( ( _, _ ) => unpackTo() ) {
+            Text = @$"U&npack {fileUtil.name} to... (subdir /{fileUtil.nameNoExt})",
+            ShortcutKeys = Keys.Control | Keys.N,
         };
         ToolStripMenuItemEx fileMenu = new() {
             Text = @"&Action",
-            DropDownItems = { actionOpenMenuItem }
+            DropDownItems = {
+                actionUnpackMenuItem,
+                actionUnpackAsMenuItem,
+            }
         };
         previewForm.menuStrip.Items.Add( fileMenu );
 
@@ -39,8 +46,21 @@ public abstract class DemiseFileHandler<T> : IDemiseFileHandler where T : IDemis
         return demiseAsset.load();
     }
 
+    protected void unpackTo() {
+        using FolderBrowserDialog saveFileDialog = new() {
+        };
+        
+        if ( saveFileDialog.ShowDialog() != DialogResult.OK ) {
+            return; // cancel
+        }
+
+        string filePath = saveFileDialog.SelectedPath;
+
+        unpack( $"{saveFileDialog.SelectedPath}/{fileUtil.nameNoExt}" );
+    }
+
     public abstract IDemiseFileHandler open( string filePath );
-    public abstract void unpack();
+    public abstract void unpack( string outputDir );
     public abstract AutoForm showPreview();
 }
 

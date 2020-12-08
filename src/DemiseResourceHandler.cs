@@ -44,8 +44,7 @@ public class DemiseResourceHandler : DemiseFileHandler<DemiseResourceMap> {
         return previewForm;
     }
 
-    public override void unpack() {
-        string outputDir = fileUtil.pathNameNoExt;
+    public override void unpack( string outputDir ) {
         Directory.CreateDirectory( outputDir );
         Console.Out.WriteLine( $"output dir: {outputDir}" );
 

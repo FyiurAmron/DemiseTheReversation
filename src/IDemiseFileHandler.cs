@@ -4,7 +4,7 @@ using FormUtils;
 
 public interface IDemiseFileHandler {
     public IDemiseFileHandler open( string filePath );
-    public void unpack();
+    public void unpack( string outputDir );
     public AutoForm showPreview();
 }
 
