@@ -18,7 +18,9 @@ public class DemiseResourceHandler : DemiseFileHandler<DemiseResourceMap> {
             fileUtil = fileUtil,
         };
 
-        loadAsset();
+        long readCount = loadAsset();
+        
+        Console.Out.WriteLine( $"{readCount} of {fileUtil.length} read." );
 
         return this;
     }
