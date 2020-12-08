@@ -98,7 +98,9 @@ public partial class MainForm : AutoForm {
                 break;
         }
 
-        currentFileHandler?.open( filePath );
+        currentFileHandler?
+            .open( filePath )
+            .showPreview();
     }
 
     private void openDED( string filePath ) {

@@ -12,9 +12,9 @@ public static class DemiseConsts {
     }
     
     public static readonly SortedMap<FileType, string> FILE_TYPES = new() {
-        [FileType.DED] = "Demise Data",
-        [FileType.DER] = "Demise Resource",
-        [FileType.DEA] = "Demise Animation",
+        [FileType.DED] = "DEmise Data",
+        [FileType.DER] = "DEmise Resource archive",
+        [FileType.DEA] = "DEmise Animation",
     };
 
     public static readonly string[] XORED_DED_FILES = {
@@ -88,23 +88,6 @@ public static class DemiseConsts {
     };
 
     public const int DED_HEADER_END_OFFSET = 24;
-
-    public static readonly byte[] DER_NAME_XOR_MASK1 = {
-        0x37, 0x29, 0xC6, 0x57, 0x4D, 0x82, 0x31, 0x18, 0x7C, 0x38, 0x5D, 0x11, 0x3A, 0x4C, 0x88, 0x6B,
-        0x94, 0x90, 0xB7, 0xAA, 0x5A, 0x2E, 0xFB, 0x87, 0x18, 0x7B, 0x03, 0xB8, 0xDE, 0x8B,
-    };
-
-    public static readonly byte[] DER_NAME_XOR_MASK2 = {
-        0x74,
-    };
-
-    public const string IWA_1_2_MAGIC = "IWAv1.2\0";
-    public const string DEA_1_2_MAGIC = "DEAv1.2\0";
-    
-    public const string DER_1_3_MAGIC = "DERv1.3\0";
-
-    public const int DER_XOR1_ASSET_NAME_SEED = 0x0009_1C80;
-    public const int DER_XOR1_DER_NAME_SEED = 0x000A_2F3B;
     
     public const int STAT_IDX_MAX = 6;
 

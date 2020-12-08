@@ -1,8 +1,11 @@
 namespace DemiseTheReversation {
 
+using FormUtils;
+
 public interface IDemiseFileHandler {
-    public void open( string filePath );
+    public IDemiseFileHandler open( string filePath );
     public void unpack();
+    public AutoForm showPreview();
 }
 
 }

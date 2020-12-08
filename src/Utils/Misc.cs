@@ -147,13 +147,22 @@ public static class IEnumerableExtensions {
             action( t );
         }
     }
+
+    public static string toString<T>( this IEnumerable<T> iEnumerable ) {
+        return "[" + string.Join( "; ", iEnumerable ) + "]";
+    }
+
+    public static object[] toObjectArray<T>( this IEnumerable<T> iEnumerable ) {
+        T[] tArr = iEnumerable.ToArray();
+        object[] arr = new object[tArr.Length];
+        
+        Array.Copy( tArr, arr, tArr.Length );
+        
+        return arr;
+    }
 }
 
 public static class ArrayExtensions {
-    public static string toString<T>( this IEnumerable<T> array ) {
-        return "[" + string.Join( "; ", array ) + "]";
-    }
-
     public static string toString( this byte[] bytes, Encoding encoding = null ) {
         return ( encoding ?? Misc.defaultEncoding ).GetString( bytes );
     }

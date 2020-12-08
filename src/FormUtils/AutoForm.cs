@@ -19,25 +19,27 @@ public class AutoForm : Form {
         private init => base.MdiParent = value;
     }
 
-    public AutoForm( bool hasMenu = true, Form mdiParent = null ) {
+    public AutoForm( bool hasMenu = true, Form mdiParent = null, bool hasFlowLayout = true ) {
         SuspendLayout();
 
         MdiParent = mdiParent;
-        
+
         AutoSize = true;
         // AutoSizeMode = AutoSizeMode.GrowAndShrink;
         AutoSizeMode = AutoSizeMode.GrowOnly;
         // FormBorderStyle = FormBorderStyle.Sizable;
 
-        flowLayoutPanel = new() {
-            // BackColor = Color.Black
-            AutoSize = true,
-            AutoSizeMode = AutoSizeMode.GrowAndShrink,
-            Dock = DockStyle.Top,
-            //AutoScroll = true
-        };
+        if ( hasFlowLayout ) {
+            flowLayoutPanel = new() {
+                // BackColor = Color.Black
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                Dock = DockStyle.Top,
+                //AutoScroll = true
+            };
 
-        Controls.Add( flowLayoutPanel );
+            Controls.Add( flowLayoutPanel );
+        }
 
         if ( hasMenu ) {
             menuStrip = new() {
@@ -50,6 +52,10 @@ public class AutoForm : Form {
         }
 
         ResumeLayout();
+    }
+
+    public void add( params Control[] items ) {
+        flowLayoutPanel.Controls.AddRange( items );
     }
 }
 
