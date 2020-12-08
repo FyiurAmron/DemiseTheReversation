@@ -33,7 +33,7 @@ public partial class MainForm : AutoForm {
         };
         ToolStripMenuItemEx exitMenuItem = new( ( _, _ ) => Application.Exit() ) {
             Text = @"E&xit",
-            ShortcutKeys = Keys.Control | Keys.Q,
+            ShortcutKeys = Keys.Alt | Keys.F4,
         };
 
         ToolStripMenuItemEx fileMenu = new() {
