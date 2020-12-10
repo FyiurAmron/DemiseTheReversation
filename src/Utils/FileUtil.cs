@@ -8,6 +8,7 @@ public class FileUtil {
     public string pathNameNoExt { get; }
     public string path { get; }
     public string name { get; }
+    public string ext { get; }
     public string nameNoExt { get; }
     public int length { get; private set; }
 
@@ -15,6 +16,7 @@ public class FileUtil {
         this.pathName = pathName;
         name = Path.GetFileName( pathName );
         nameNoExt = Path.GetFileNameWithoutExtension( pathName );
+        ext = Path.GetExtension( pathName )?.TrimStart('.');
         path = Path.GetDirectoryName( pathName )
             ?? throw new ArgumentException( $"invalid path '{pathName}'" );
         pathNameNoExt = $"{path}/{nameNoExt}";

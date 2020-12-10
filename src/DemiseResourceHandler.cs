@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using FormUtils;
 
 public class DemiseResourceHandler : DemiseFileHandler<DemiseResourceMap> {
-
     public DemiseResourceHandler( AutoForm parent ) : base( parent ) {
     }
 
@@ -19,7 +18,7 @@ public class DemiseResourceHandler : DemiseFileHandler<DemiseResourceMap> {
         };
 
         long readCount = loadAsset();
-        
+
         Console.Out.WriteLine( $"{readCount} of {fileUtil.length} read." );
 
         return this;
@@ -36,7 +35,7 @@ public class DemiseResourceHandler : DemiseFileHandler<DemiseResourceMap> {
         listBox.BeginUpdate();
         listBox.Items.AddRange( demiseAsset.toObjects() );
         listBox.EndUpdate();
-        
+
         previewForm.autoControls.Add( listBox );
 
         addDefaultMenuAndShow();
@@ -49,6 +48,18 @@ public class DemiseResourceHandler : DemiseFileHandler<DemiseResourceMap> {
         Console.Out.WriteLine( $"output dir: {outputDir}" );
 
         foreach ( DemiseResource res in demiseAsset ) {
+            // // in case we need to separate the files based on some magic, we have to e.g.:
+            // Utils.FileUtil fu = new( res.name );
+            // if ( fu.ext.ToUpper() == DemiseFilenameConsts.FileType.DET.ToString() ) {
+            //     DemiseTexture dt = new();
+            //     dt.load( res.bytes );
+            //     string outputDir2 = $"{outputDir}/{dt.type:X8}/{dt.frameCount:D2}";
+            //     Directory.CreateDirectory( outputDir2 );
+            //     Console.Out.WriteLine( $"writing: {res.name} ..." );
+            //     res.save( outputDir2 );
+            //     continue;
+            // }
+
             Console.Out.WriteLine( $"writing: {res.name} ..." );
             res.save( outputDir );
         }

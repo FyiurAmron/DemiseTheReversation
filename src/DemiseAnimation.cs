@@ -46,8 +46,6 @@ public sealed class DemiseAnimation : DemiseAsset {
         frameCount = br.ReadInt32();
         notBook = br.ReadInt32();
 
-        // int frameLength = stride * height;
-
         bitmaps = new ByteBackedBitmap[frameCount];
 
         for ( int i = 0; i < bitmaps.Length; i++ ) {
