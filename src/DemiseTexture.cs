@@ -129,19 +129,40 @@ public sealed class DemiseTexture : DemiseAsset {
             }
             case 0x0000_2015: // 16-bit R5G6B5
             {
-                for ( int i = 0; i < frameCount; i++ ) {
-                    ByteBackedBitmap bbb = new( width, height, PixelFormat.Format16bppRgb565 );
-                    byte[] bmpBytes = bbb.bytes;
-                    bitmaps[i] = bbb;
+                ByteBackedBitmap bbb = new( width, height, PixelFormat.Format16bppRgb565 );
+                byte[] bmpBytes = bbb.bytes;
+                bitmaps[0] = bbb;
 
-                    int idx = 0;
-                    for ( int y = 0; y < height; y++ ) {
-                        short val = 0;
-                        for ( int x = 0; x < bbb.stride; x += 2, idx += 2 ) {
+                int idx = 0;
+                for ( int y = 0; y < height; y++ ) {
+                    short val = 0;
+                    for ( int x = 0; x < bbb.stride; x += 2, idx += 2 ) {
+                        if ( frameCount == 1 ) {
                             val += br.ReadInt16();
+                        } else {
+                            val = br.ReadInt16();
+                        }
 
-                            ( bmpBytes[idx], bmpBytes[idx + 1] )
-                                = ( (byte) val, (byte) ( val >> 8 ) );
+                        ( bmpBytes[idx], bmpBytes[idx + 1] )
+                            = ( (byte) val, (byte) ( val >> 8 ) );
+                    }
+                }
+
+                if ( frameCount > 1 ) {
+                    for ( int i = 1; i < frameCount; i++ ) {
+                        bbb = new( width, height, PixelFormat.Format16bppRgb565 );
+                        bmpBytes = bbb.bytes;
+                        byte[] prvBytes = bitmaps[i - 1].bytes;
+                        bitmaps[i] = bbb;
+
+                        idx = 0;
+                        for ( int y = 0; y < height; y++ ) {
+                            for ( int x = 0; x < bbb.stride; x += 2, idx += 2 ) {
+                                short val = (short) ( br.ReadInt16()
+                                    + (short) ( prvBytes[idx] | ( prvBytes[idx + 1] << 8 ) ) );
+                                bmpBytes[idx] = (byte) val;
+                                bmpBytes[idx + 1] = (byte) ( val >> 8 );
+                            }
                         }
                     }
                 }
