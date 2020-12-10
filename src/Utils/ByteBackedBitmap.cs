@@ -27,6 +27,17 @@ public sealed class ByteBackedBitmap : IDisposable {
         bitmap?.Dispose();
         pinnedBytes.Free();
     }
+
+    public void setPalette( /* [InstantHandle] */ Func<byte, Color> setter ) {
+        ColorPalette cp = bitmap.Palette;
+        Color[] cpEntries = cp.Entries;
+
+        for ( short i = 0; i < cpEntries.Length; i++ ) { // max palette size is 1 << 8 (256) per def
+            cpEntries[i] = setter( (byte) i );
+        }
+
+        bitmap.Palette = cp;
+    }
 }
 
 }

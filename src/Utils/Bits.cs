@@ -21,6 +21,16 @@ public static class Bits {
         return ( b1, b2 );
     }
 
+    // ReSharper disable once InconsistentNaming
+    public static (byte, byte, byte, byte) argb4444toBytes( short s ) {
+        return (
+            (byte) ( ( s & 0x0F ) * 17 ), // blue
+            (byte) ( ( ( s >> 4 ) & 0x0F ) * 17 ), // green
+            (byte) ( ( ( s >> 8 ) & 0x0F ) * 17 ), // red
+            (byte) ( ( s >> 12 ) * 17 ) // alpha
+        ); // x / 15 * 255 = 17x
+    }
+
     public static void applyXorMask( byte[] bytes, byte[] mask, int start = 0, int? end = null ) {
         end ??= Math.Min( mask.Length + start, bytes.Length );
 

@@ -2,6 +2,7 @@ namespace DemiseTheReversation.Utils {
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -49,7 +50,7 @@ public static class ArrayExtensions {
     }
 }
 
-public static class StreamExtensions {
+public static class BinaryReaderExtensions {
     public static void skip( this BinaryReader binaryReader, int offset ) {
         binaryReader.seek( offset, SeekOrigin.Current );
     }
@@ -65,6 +66,16 @@ public static class StreamExtensions {
 
     public static string readString( this BinaryReader binaryReader, int length, Encoding encoding = null ) {
         return ( encoding ?? Encoding.Default ).GetString( binaryReader.ReadBytes( length ) );
+    }
+
+    // ReSharper disable once InconsistentNaming
+    public static Color readColorRGBA( this BinaryReader binaryReader ) {
+        byte r = binaryReader.ReadByte(),
+             g = binaryReader.ReadByte(),
+             b = binaryReader.ReadByte(),
+             a = binaryReader.ReadByte();
+        // single reads needed due to endian swizzle
+        return Color.FromArgb( a, r, g, b );
     }
 }
 
