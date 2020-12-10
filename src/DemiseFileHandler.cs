@@ -1,5 +1,6 @@
 namespace DemiseTheReversation {
 
+using System;
 using System.Windows.Forms;
 using FormUtils;
 using Utils;
@@ -18,6 +19,7 @@ public abstract class DemiseFileHandler<T> : IDemiseFileHandler where T : IDemis
         previewForm = new( mdiParent: parent ) {
             Text = fileUtil.name,
         };
+        previewForm.Disposed += ( _, _ ) => Dispose();
         return previewForm;
     }
 
@@ -47,16 +49,19 @@ public abstract class DemiseFileHandler<T> : IDemiseFileHandler where T : IDemis
     }
 
     protected void unpackTo() {
-        using FolderBrowserDialog saveFileDialog = new() {
-        };
-        
-        if ( saveFileDialog.ShowDialog() != DialogResult.OK ) {
+        using FolderBrowserDialog folderBrowserDialog = new();
+
+        if ( folderBrowserDialog.ShowDialog() != DialogResult.OK ) {
             return; // cancel
         }
 
-        string filePath = saveFileDialog.SelectedPath;
+        unpack( $"{folderBrowserDialog.SelectedPath}/{fileUtil.nameNoExt}" );
+    }
 
-        unpack( $"{saveFileDialog.SelectedPath}/{fileUtil.nameNoExt}" );
+    public void Dispose() {
+        demiseAsset.Dispose();
+
+        GC.SuppressFinalize( this );
     }
 
     public abstract IDemiseFileHandler open( string filePath );

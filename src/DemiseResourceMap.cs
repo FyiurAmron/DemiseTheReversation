@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using Utils;
 
-public class DemiseResourceMap : IEnumerable<DemiseResource>, IDemiseAsset {
+public sealed class DemiseResourceMap : DemiseAsset, IEnumerable<DemiseResource> {
     public const string DER_1_3_MAGIC = "DERv1.3\0";
 
     public const int DER_XOR1_ASSET_NAME_SEED = 0x0009_1C80;
@@ -22,7 +22,6 @@ public class DemiseResourceMap : IEnumerable<DemiseResource>, IDemiseAsset {
     };
 
     private readonly Map<string, DemiseResource> resources = new();
-    public FileUtil fileUtil { get; init; }
 
     public DemiseResource this[ string key ] {
         get => resources[key];
@@ -47,7 +46,7 @@ public class DemiseResourceMap : IEnumerable<DemiseResource>, IDemiseAsset {
                .toObjectArray();
     }
 
-    public long load( byte[] bytes ) {
+    public override long load( byte[] bytes ) {
         using MemoryStream ms = new( bytes );
         using BinaryReader br = new( ms );
         string magic = br.readString( 8 );
@@ -86,11 +85,9 @@ public class DemiseResourceMap : IEnumerable<DemiseResource>, IDemiseAsset {
                 derSize = br.ReadInt32(),
                 realSize = br.ReadInt32(),
 
-                hash = hash,
-
                 fileUtil = new FileUtil( $"{fileUtil.pathNameNoExt}/{assetName}" )
             };
-
+            res.initXorMask( hash );
             res.loadFromDer( bytes );
             this[res.name] = res;
         }

@@ -6,20 +6,20 @@ using System.IO;
 using System.Windows.Forms;
 using FormUtils;
 
-public class DemiseAnimationHandler : DemiseFileHandler<DemiseAnimation> {
+public class DemiseTextureHandler : DemiseFileHandler<DemiseTexture> {
     private Image[] frames;
 
-    public DemiseAnimationHandler( AutoForm parent ) : base( parent ) {
+    public DemiseTextureHandler( AutoForm parent ) : base( parent ) {
     }
 
     public override IDemiseFileHandler open( string filePath ) {
         Console.Out.Write( $"loading {filePath} ... " );
         fileUtil = new( filePath );
 
-        demiseAsset = new DemiseAnimation() {
+        demiseAsset = new DemiseTexture() {
             fileUtil = fileUtil
         };
-        
+
         long srcPtr = loadAsset();
 
         Console.Out.WriteLine( $"{srcPtr} of {fileUtil.length} read." );
@@ -30,40 +30,41 @@ public class DemiseAnimationHandler : DemiseFileHandler<DemiseAnimation> {
     public override AutoForm showPreview() {
         createPreviewForm();
 
-        PictureBox animPb = new() {
-            SizeMode = PictureBoxSizeMode.AutoSize
-        };
-        previewForm.add( animPb );
-
-        frames = new Image[demiseAsset.frameCount * 2];
-        int[] delays = new int[demiseAsset.frameCount * 2];
+        frames = new Image[demiseAsset.frameCount];
 
         void addPictureBox( int i ) {
             Bitmap bmp = demiseAsset[i];
-
-            int i2 = demiseAsset.frameCount * 2 - i - 1;
-
             frames[i] = bmp;
-            frames[i2] = bmp;
-            delays[i] = demiseAsset.delayMs;
-            delays[i2] = demiseAsset.delayMs;
 
             PictureBox pb = new() {
                 Image = bmp,
                 SizeMode = PictureBoxSizeMode.AutoSize
             };
-
+            Console.Out.WriteLine( pb.Size );
             previewForm.add( pb );
+            // previewForm.Controls.Add( pb );
         }
 
         for ( int i = 0; i < demiseAsset.frameCount; i++ ) {
             addPictureBox( i );
         }
 
-        animPb.Image = AnimImage.createAnimation( animPb, frames, delays );
-        
+        // previewForm.flowLayoutPanel.MinimumSize = new( demiseAsset.width + 6, demiseAsset.height + 6 );
+        // Console.Out.WriteLine( previewForm.flowLayoutPanel.Size );
+
+        // previewForm.flowLayoutPanel.PerformLayout();
+        // previewForm.flowLayoutPanel.Refresh();
+        // previewForm.flowLayoutPanel.Invalidate();
+        // previewForm.flowLayoutPanel.ResumeLayout(true);
+
+        // previewForm.PerformLayout();
+        // previewForm.Refresh();
+        // previewForm.Invalidate();
+        // previewForm.ResumeLayout(true);
+        // previewForm.MinimumSize = new( demiseAsset.width, demiseAsset.height );
+
         addDefaultMenuAndShow();
-        
+
         return previewForm;
     }
 

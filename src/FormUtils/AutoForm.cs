@@ -27,13 +27,12 @@ public class AutoForm : Form {
         MdiParent = mdiParent;
 
         AutoSize = true;
-        // AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        AutoSizeMode = AutoSizeMode.GrowOnly;
+        // AutoSizeMode = AutoSizeMode.GrowAndShrink; // AutoSizeMode.GrowOnly; is the default
         // FormBorderStyle = FormBorderStyle.Sizable;
 
         if ( hasFlowLayout ) {
             flowLayoutPanel = new() {
-                // BackColor = Color.Black
+                // BackColor = System.Drawing.Color.Black,
                 AutoSize = true,
                 AutoSizeMode = AutoSizeMode.GrowAndShrink,
                 Dock = DockStyle.Top,
