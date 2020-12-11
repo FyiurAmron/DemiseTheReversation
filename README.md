@@ -177,9 +177,11 @@ ror( 0xCD, 3 ) ^ 0xCD = 0x74 // possible since 3 MSB (101) in 3rd val are equal 
 --------------------
 
 DES -> MS Wave (.WAV)
+DET (Texture) implemented fully
+DEA (Animation) implemented fully, possibly with bugs 
 
 TODO:
 
-DET (Texture)
 DEO (3D Object)
-DEA (Animation)
+rest of DED
+

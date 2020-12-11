@@ -7,6 +7,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+public static class IntExtensions {
+    public static (byte, byte) toBytes( this short s ) {
+        return ( (byte) s, (byte) ( s >> 8 ) );
+    }
+}
+
 public static class StringExtensions {
     public static byte[] toBytes( this string s, Encoding encoding = null ) {
         return ( encoding ?? Misc.defaultEncoding ).GetBytes( s );
@@ -47,6 +53,10 @@ public static class IEnumerableExtensions {
 public static class ArrayExtensions {
     public static string toString( this byte[] bytes, Encoding encoding = null ) {
         return ( encoding ?? Misc.defaultEncoding ).GetString( bytes );
+    }
+
+    public static short getShort( this byte[] bytes, int pos ) {
+        return (short) ( bytes[pos] | ( bytes[pos + 1] << 8 ) );
     }
 }
 

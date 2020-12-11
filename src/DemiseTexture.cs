@@ -61,7 +61,6 @@ public sealed class DemiseTexture : DemiseAsset {
 
         // // ( type & 1 << 3 ) - 8bpp
         // // ( type & 1 << 4 ) - 16bpp
-        // TODO animated
         bitmaps = new ByteBackedBitmap[frameCount];
         switch ( type ) {
             case 0x0000_0311: // 16-bit greyscale with alpha: V8A8
@@ -82,7 +81,7 @@ public sealed class DemiseTexture : DemiseAsset {
                         for ( int x = 0; x < bbb.stride / 4; x++, idx += 4 ) {
                             val += br.ReadInt16();
 
-                            ( byte alpha, byte value ) = ( (byte) ( val >> 8 ), (byte) val );
+                            ( byte value, byte alpha ) = val.toBytes();
 
                             bmpBytes[idx + 0] =
                                 bmpBytes[idx + 1] =
@@ -99,8 +98,8 @@ public sealed class DemiseTexture : DemiseAsset {
             case 0x0000_0108: // 8-bit grayscale: V8
             {
                 for ( int i = 0; i < frameCount; i++ ) {
-                    ByteBackedBitmap bbb = new( width, height, PixelFormat.Format8bppIndexed );
-                    bitmaps[i] = bbb;
+                    bitmaps[i] = new( width, height, PixelFormat.Format8bppIndexed );
+                    ByteBackedBitmap bbb = bitmaps[i];
 
                     bbb.setPalette( ( idx ) =>
                                         ( type == 0x0000_0108 )
@@ -108,18 +107,20 @@ public sealed class DemiseTexture : DemiseAsset {
                                             // ReSharper disable once AccessToDisposedClosure
                                             : br.readColorRGBA()
                     );
-                }
-
-                // palette has to be read first, since, if used, it's physically first in file
-
-                for ( int i = 0; i < frameCount; i++ ) {
-                    ByteBackedBitmap bbb = bitmaps[i];
+                    // palette has to be read first, since, if used, it's physically first in file
                     byte[] bmpBytes = bbb.bytes;
-                    int idx = 0;
-                    for ( int y = 0; y < height; y++ ) {
+                    for ( int y = 0, idx = 0; y < height; y++ ) {
                         byte val = 0;
                         for ( int x = 0; x < bbb.stride; x++, idx++ ) {
-                            val += br.ReadByte();
+                            if ( frameCount == 1 ) {
+                                val += br.ReadByte();
+                            } else {
+                                val = (byte) ( br.ReadByte()
+                                    + ( ( i == 0 )
+                                        ? 0
+                                        : bitmaps[i - 1].bytes[idx] ) );
+                            }
+
                             bmpBytes[idx] = val;
                         }
                     }
@@ -129,9 +130,12 @@ public sealed class DemiseTexture : DemiseAsset {
             }
             case 0x0000_2015: // 16-bit R5G6B5
             {
-                ByteBackedBitmap bbb = new( width, height, PixelFormat.Format16bppRgb565 );
+                for ( int i = 0; i < frameCount; i++ ) {
+                    bitmaps[i] = new( width, height, PixelFormat.Format16bppRgb565 );
+                }
+
+                ByteBackedBitmap bbb = bitmaps[0];
                 byte[] bmpBytes = bbb.bytes;
-                bitmaps[0] = bbb;
 
                 int idx = 0;
                 for ( int y = 0; y < height; y++ ) {
@@ -143,25 +147,21 @@ public sealed class DemiseTexture : DemiseAsset {
                             val = br.ReadInt16();
                         }
 
-                        ( bmpBytes[idx], bmpBytes[idx + 1] )
-                            = ( (byte) val, (byte) ( val >> 8 ) );
+                        ( bmpBytes[idx], bmpBytes[idx + 1] ) = val.toBytes();
                     }
                 }
 
                 if ( frameCount > 1 ) {
                     for ( int i = 1; i < frameCount; i++ ) {
-                        bbb = new( width, height, PixelFormat.Format16bppRgb565 );
+                        bbb = bitmaps[i];
                         bmpBytes = bbb.bytes;
                         byte[] prvBytes = bitmaps[i - 1].bytes;
-                        bitmaps[i] = bbb;
 
                         idx = 0;
                         for ( int y = 0; y < height; y++ ) {
                             for ( int x = 0; x < bbb.stride; x += 2, idx += 2 ) {
-                                short val = (short) ( br.ReadInt16()
-                                    + (short) ( prvBytes[idx] | ( prvBytes[idx + 1] << 8 ) ) );
-                                bmpBytes[idx] = (byte) val;
-                                bmpBytes[idx + 1] = (byte) ( val >> 8 );
+                                short val = (short) ( br.ReadInt16() + prvBytes.getShort( idx ) );
+                                ( bmpBytes[idx], bmpBytes[idx + 1] ) = val.toBytes();
                             }
                         }
                     }
@@ -172,24 +172,48 @@ public sealed class DemiseTexture : DemiseAsset {
             case 0x0000_2213: // 16-bit A4B4G4R4
             { // note: remapped to 32-bit since we don't have native support for it
                 for ( int i = 0; i < frameCount; i++ ) {
-                    ByteBackedBitmap bbb = new( width, height, PixelFormat.Format32bppArgb );
-                    byte[] bmpBytes = bbb.bytes;
-                    bitmaps[i] = bbb;
+                    bitmaps[i] = new( width, height, PixelFormat.Format32bppArgb );
+                }
 
-                    int idx = 0;
-                    for ( int y = 0; y < height; y++ ) {
-                        short val = 0;
-                        for ( int x = 0; x < bbb.stride; x += 4, idx += 4 ) {
+                ByteBackedBitmap bbb = bitmaps[0];
+                byte[] bmpBytes = bbb.bytes;
+                short[] data = new short[height * bbb.stride / 4]; // needed due to aforementioned remapping
+
+                for ( int y = 0, idx = 0; y < height; y++ ) {
+                    short val = 0;
+                    for ( int x = 0; x < bbb.stride; x += 4, idx += 4 ) {
+                        if ( frameCount == 1 ) {
                             val += br.ReadInt16();
+                        } else {
+                            val = br.ReadInt16();
+                        }
 
-                            ( bmpBytes[idx + 0], bmpBytes[idx + 1], bmpBytes[idx + 2], bmpBytes[idx + 3] )
-                                = Bits.argb4444toBytes( val );
+                        data[idx / 4] = val;
+
+                        ( bmpBytes[idx + 0], bmpBytes[idx + 1], bmpBytes[idx + 2], bmpBytes[idx + 3] )
+                            = Bits.argb4444toBytes( val );
+                    }
+                }
+
+                if ( frameCount > 1 ) {
+                    for ( int i = 1; i < frameCount; i++ ) {
+                        bbb = bitmaps[i];
+                        bmpBytes = bbb.bytes;
+
+                        for ( int y = 0, idx = 0; y < height; y++ ) {
+                            for ( int x = 0; x < bbb.stride; x += 4, idx += 4 ) {
+                                data[idx / 4] += br.ReadInt16();
+
+                                ( bmpBytes[idx + 0], bmpBytes[idx + 1], bmpBytes[idx + 2], bmpBytes[idx + 3] )
+                                    = Bits.argb4444toBytes( data[idx / 4] );
+                            }
                         }
                     }
                 }
 
                 break;
             }
+
             default:
                 throw new FileFormatException( $"image type {type:X8} invalid/not supported" );
         }
