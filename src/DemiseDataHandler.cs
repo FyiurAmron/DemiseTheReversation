@@ -87,17 +87,16 @@ public class DemiseDataHandler : DemiseFileHandler<DemiseData> {
 
     public override IDemiseFileHandler open( string filePath ) {
         Console.Out.Write( filePath );
-        string fileName = Path.GetFileName( filePath );
+        fileUtil = new( filePath );
+
         byte[] bytes = File.ReadAllBytes( filePath );
-        //Stream fileStream = openFileDialog.OpenFile();
-        //using BinaryReader reader = new( fileStream );
-        //reader.ReadBytes( ... );
+
         Console.Out.Write( " =>" );
 
         using MemoryStream ms = new( bytes );
         using BinaryReader br = new( ms );
 
-        if ( XORED_DED_FILES.Contains( fileName ) ) {
+        if ( XORED_DED_FILES.Contains( fileUtil.name ) ) {
             uint magic = br.ReadUInt32();
             byte[] xorMaskHeader,
                    xorMaskMain;
@@ -127,7 +126,7 @@ public class DemiseDataHandler : DemiseFileHandler<DemiseData> {
             Console.Out.WriteLine( $"v{br.ReadInt16()} {br.readString( 6 ).TrimEnd()} rev.{br.ReadInt16()}" );
         }
 
-        if ( fileName == "DEMISEItems.DED" ) {
+        if ( fileUtil.name == "DEMISEItems.DED" ) { // TODO refactor to DemiseItemsData
             short expectedItemCount = br.ReadInt16();
 
             List<Item> items = new();
