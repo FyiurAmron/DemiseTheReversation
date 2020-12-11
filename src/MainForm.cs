@@ -30,7 +30,6 @@ public partial class MainForm : AutoForm {
             Text = @"E&xit",
             ShortcutKeys = Keys.Alt | Keys.F4,
         };
-
         ToolStripMenuItemEx fileMenu = new() {
             Text = @"&File",
             DropDownItems = {
@@ -40,8 +39,18 @@ public partial class MainForm : AutoForm {
             }
         };
 
-        ToolStripMenuItemEx windowMenu = new() { Text = @"&Windows" };
-
+        ToolStripMenuItemEx closeAllWindowsMenuItem = new(
+            ( _, _ ) => MdiChildren.forEach( ( f ) => f.Close() )
+        ) {
+            Text = @"&Close all",
+            ShortcutKeys = Keys.Control | Keys.X,
+        };
+        ToolStripMenuItemEx windowMenu = new() {
+            Text = @"&Windows",
+            DropDownItems = {
+                closeAllWindowsMenuItem,
+            }
+        };
         ms.MdiWindowListItem = windowMenu;
 
         ms.Items.add( fileMenu, /*actionMenu,*/ windowMenu );
