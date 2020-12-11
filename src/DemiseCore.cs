@@ -33,7 +33,7 @@ public class DemiseCore {
             FileType.DER => new DemiseResourceHandler( parentForm ),
             FileType.DEA => new DemiseAnimationHandler( parentForm ),
             FileType.DET => new DemiseTextureHandler( parentForm ),
-            FileType.DEO => new DemiseTextureHandler( parentForm ),
+            FileType.DEO => new DemiseObjectHandler( parentForm ),
             _ => throw new NotSupportedException()
         };
     }
