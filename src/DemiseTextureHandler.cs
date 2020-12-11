@@ -29,6 +29,19 @@ public class DemiseTextureHandler : DemiseFileHandler<DemiseTexture> {
 
     public override AutoForm showPreview() {
         createPreviewForm();
+        // TODO refactor to some GfxPreviewForm etc.
+        MouseEventHandler mouseHandler = ( _, args ) => {
+            if ( args.Button != MouseButtons.Right ) {
+                return;
+            }
+
+            ColorDialog colorDialog = new();
+            if ( colorDialog.ShowDialog() == DialogResult.OK ) {
+                previewForm.BackColor = colorDialog.Color;
+            }
+        };
+        previewForm.MouseClick += mouseHandler;
+        previewForm.flowLayoutPanel.MouseClick += mouseHandler;
 
         frames = new Image[demiseAsset.frameCount];
 
@@ -40,7 +53,8 @@ public class DemiseTextureHandler : DemiseFileHandler<DemiseTexture> {
                 Image = bmp,
                 SizeMode = PictureBoxSizeMode.AutoSize
             };
-            Console.Out.WriteLine( pb.Size );
+            pb.MouseClick += mouseHandler;
+            // Console.Out.WriteLine( pb.Size );
             previewForm.add( pb );
             // previewForm.Controls.Add( pb );
         }
