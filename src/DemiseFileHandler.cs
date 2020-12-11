@@ -23,7 +23,7 @@ public abstract class DemiseFileHandler<T> : IDemiseFileHandler where T : IDemis
         return previewForm;
     }
 
-    protected void addDefaultMenuAndShow() {
+    protected void addUnpackMenuAndShow() {
         ToolStripMenuItemEx actionUnpackMenuItem = new( ( _, _ ) => unpack( fileUtil.pathNameNoExt ) ) {
             Text = @$"&Unpack {fileUtil.name} to {fileUtil.pathNameNoExt}",
             ShortcutKeys = Keys.Control | Keys.U,

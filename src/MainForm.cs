@@ -3,11 +3,9 @@ namespace DemiseTheReversation {
 using System.Windows.Forms;
 using System.IO;
 using System;
-using System.Linq;
-using System.Text;
 using FormUtils;
 using Utils;
-using static DemiseFilenameConsts;
+using static DemiseCore;
 
 // sadly, the designer doesn't work ATM for derived classes
 public partial class MainForm : AutoForm {
@@ -58,21 +56,9 @@ public partial class MainForm : AutoForm {
         ResumeLayout();
     }
 
-    private static string createFilterString() {
-        string[] keys = FILE_TYPES.Keys.Select( ( s ) => "*." + s ).ToArray();
-
-        StringBuilder sb = new();
-        sb
-            .Append( $"Demise assets ({keys.join( ", " )})|{keys.join( ";" )}|" )
-            .appendAll( FILE_TYPES.Select( ( kv ) => $"{kv.Value} (*.{kv.Key})|*.{kv.Key}|" ) )
-            .Append( "All files (*.*)|*.*" );
-
-        return sb.ToString();
-    }
-
     private void fileOpenEventHandler( object sender, EventArgs eventArgs ) {
         using OpenFileDialog openFileDialog = new() {
-            Filter = createFilterString(),
+            Filter = createDialogFilterString(),
             Multiselect = true,
         };
 
@@ -91,26 +77,8 @@ public partial class MainForm : AutoForm {
                 throw new ArgumentException( $"unknown extension '{ext}'" );
             }
 
-            IDemiseFileHandler currentFileHandler = null;
-            switch ( ft ) {
-                case FileType.DED:
-                    DemiseDataHandler.openDED( filePath );
-                    break;
-                case FileType.DER:
-                    currentFileHandler = new DemiseResourceHandler( this );
-                    break;
-                case FileType.DEA:
-                    currentFileHandler = new DemiseAnimationHandler( this );
-                    break;
-                case FileType.DET:
-                    currentFileHandler = new DemiseTextureHandler( this );
-                    break;
-                default:
-                    throw new NotSupportedException();
-            }
-
-            currentFileHandler?
-                .open( filePath )
+            getHandler( ft, this )
+                ?.open( filePath )
                 .showPreview();
         }
     }

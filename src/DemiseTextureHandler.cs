@@ -77,7 +77,7 @@ public class DemiseTextureHandler : DemiseFileHandler<DemiseTexture> {
         // previewForm.ResumeLayout(true);
         // previewForm.MinimumSize = new( demiseAsset.width, demiseAsset.height );
 
-        addDefaultMenuAndShow();
+        addUnpackMenuAndShow();
 
         return previewForm;
     }

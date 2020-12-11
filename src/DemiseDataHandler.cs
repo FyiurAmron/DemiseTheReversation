@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using FormUtils;
 using Utils;
 using static DemiseConsts;
 
-public class DemiseDataHandler {
+public class DemiseDataHandler : DemiseFileHandler<DemiseData> {
     public static readonly string[] XORED_DED_FILES = {
         "DEMISETextures.DED",
         "DEMISEBountyData.DED",
@@ -81,7 +82,10 @@ public class DemiseDataHandler {
     public const int DED_HEADER_MID_OFFSET = 12,
                      DED_HEADER_END_OFFSET = 24;
 
-    public static void openDED( string filePath ) {
+    public DemiseDataHandler( AutoForm parent ) : base( parent ) {
+    }
+
+    public override IDemiseFileHandler open( string filePath ) {
         Console.Out.Write( filePath );
         string fileName = Path.GetFileName( filePath );
         byte[] bytes = File.ReadAllBytes( filePath );
@@ -191,6 +195,23 @@ public class DemiseDataHandler {
         string newFilePath = filePath + ".decoded";
         File.WriteAllBytes( newFilePath, bytes );
         Console.Out.WriteLine( newFilePath );
+
+        return this;
+    }
+
+    public override void unpack( string outputDir ) {
+        // basically nothing to do here, as this format isn't usually packed
+    }
+
+    public override AutoForm showPreview() {
+        createPreviewForm();
+
+        // TODO implement for at least DED Items
+
+        // addSaveMenuAndShow();
+        previewForm.Show();
+
+        return previewForm;
     }
 }
 

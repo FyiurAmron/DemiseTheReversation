@@ -62,7 +62,7 @@ public class DemiseAnimationHandler : DemiseFileHandler<DemiseAnimation> {
 
         animPb.Image = AnimImage.createAnimation( animPb, frames, delays );
         
-        addDefaultMenuAndShow();
+        addUnpackMenuAndShow();
         
         return previewForm;
     }

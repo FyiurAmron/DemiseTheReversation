@@ -38,7 +38,7 @@ public class DemiseResourceHandler : DemiseFileHandler<DemiseResourceMap> {
 
         previewForm.autoControls.Add( listBox );
 
-        addDefaultMenuAndShow();
+        addUnpackMenuAndShow();
 
         return previewForm;
     }
