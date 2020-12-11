@@ -3,6 +3,7 @@ namespace DemiseTheReversation {
 using System;
 using System.IO;
 using FormUtils;
+using Utils;
 
 public class DemiseObjectHandler : DemiseFileHandler<DemiseObject> {
     public DemiseObjectHandler( AutoForm parent ) : base( parent ) {
@@ -18,6 +19,22 @@ public class DemiseObjectHandler : DemiseFileHandler<DemiseObject> {
 
         using MemoryStream ms = new( bytes );
         using BinaryReader br = new( ms );
+
+        string magic = br.readString( 8 );
+        switch ( magic ) {
+            case "MDOv1.2\x1A":
+            case "MDOv1.3\x1A":
+            case "DEOv1.3\x1A":
+            case "DEOv1.5\x1A":
+                break;
+            default:
+                throw new FileFormatException( $"unknown magic: {magic}" );
+        }
+        
+        br.readString( 8 );
+        
+        //br.readInt16();
+        //br.readInt16();
 
         return this;
     }
