@@ -39,17 +39,17 @@ public sealed class DemiseResource : DemiseAsset {
         return load( getBytesFromDer( derBytes ) );
     }
 
-    public override long load( byte[] sourceArray ) {
+    public override long load( byte[] sourceBytes ) {
         int esi = 0x5D;
         for ( int i = 0; i < derSize; i++ ) {
             int xorMaskIdx = esi & 0x01ff;
-            sourceArray[i] ^= xorMask[xorMaskIdx];
+            sourceBytes[i] ^= xorMask[xorMaskIdx];
             esi += 0x000D_6543;
             xorMaskIdx = ( esi >> 3 ) & 0x01FF;
             esi ^= xorMask[xorMaskIdx];
         }
 
-        bytes = Zlib.inflateZlibBytes( sourceArray, realSize );
+        bytes = Zlib.inflateZlibBytes( sourceBytes, realSize );
 
         return realSize;
     }

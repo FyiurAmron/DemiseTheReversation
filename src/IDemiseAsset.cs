@@ -8,7 +8,7 @@ public interface IDemiseAsset : IDisposable {
 
     public long load();
 
-    public long load( byte[] sourceArray );
+    public long load( byte[] sourceBytes );
     // public void save();
 }
 

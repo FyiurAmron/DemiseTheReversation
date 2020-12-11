@@ -10,31 +10,16 @@ public class DemiseObjectHandler : DemiseFileHandler<DemiseObject> {
     }
 
     public override IDemiseFileHandler open( string filePath ) {
-        Console.Out.Write( filePath );
+        // Console.Out.Write( $"loading {filePath} ... " );
         fileUtil = new( filePath );
 
-        byte[] bytes = File.ReadAllBytes( filePath );
-
-        Console.Out.Write( " =>" );
-
-        using MemoryStream ms = new( bytes );
-        using BinaryReader br = new( ms );
-
-        string magic = br.readString( 8 );
-        switch ( magic ) {
-            case "MDOv1.2\x1A":
-            case "MDOv1.3\x1A":
-            case "DEOv1.3\x1A":
-            case "DEOv1.5\x1A":
-                break;
-            default:
-                throw new FileFormatException( $"unknown magic: {magic}" );
-        }
+        demiseAsset = new DemiseObject() {
+            fileUtil = fileUtil
+        };
         
-        br.readString( 8 );
-        
-        //br.readInt16();
-        //br.readInt16();
+        long srcPtr = loadAsset();
+
+        // Console.Out.WriteLine( $"{srcPtr} of {fileUtil.length} read." );
 
         return this;
     }

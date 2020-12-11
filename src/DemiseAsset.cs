@@ -14,7 +14,7 @@ public abstract class DemiseAsset : IDemiseAsset {
         GC.SuppressFinalize( this );
     }
 
-    public abstract long load( byte[] sourceArray );
+    public abstract long load( byte[] sourceBytes );
 }
 
 }

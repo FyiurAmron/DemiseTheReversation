@@ -46,8 +46,8 @@ public sealed class DemiseResourceMap : DemiseAsset, IEnumerable<DemiseResource>
                .toObjectArray();
     }
 
-    public override long load( byte[] bytes ) {
-        using MemoryStream ms = new( bytes );
+    public override long load( byte[] sourceBytes ) {
+        using MemoryStream ms = new( sourceBytes );
         using BinaryReader br = new( ms );
         string magic = br.readString( 8 );
         if ( magic != DER_1_3_MAGIC ) {
@@ -88,7 +88,7 @@ public sealed class DemiseResourceMap : DemiseAsset, IEnumerable<DemiseResource>
                 fileUtil = new FileUtil( $"{fileUtil.pathNameNoExt}/{assetName}" )
             };
             res.initXorMask( hash );
-            res.loadFromDer( bytes );
+            res.loadFromDer( sourceBytes );
             this[res.name] = res;
         }
 

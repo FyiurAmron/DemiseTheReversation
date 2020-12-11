@@ -86,12 +86,12 @@ public class DemiseDataHandler : DemiseFileHandler<DemiseData> {
     }
 
     public override IDemiseFileHandler open( string filePath ) {
-        Console.Out.Write( filePath );
+        Console.Out.Write( $"loading {filePath} ... " );
         fileUtil = new( filePath );
 
-        byte[] bytes = File.ReadAllBytes( filePath );
+        byte[] bytes = fileUtil.load();
 
-        Console.Out.Write( " =>" );
+        // Console.Out.Write( " =>" );
 
         using MemoryStream ms = new( bytes );
         using BinaryReader br = new( ms );

@@ -31,8 +31,8 @@ public sealed class DemiseAnimation : DemiseAsset {
     public DemiseAnimation() {
     }
 
-    public override long load( byte[] sourceArray ) {
-        using MemoryStream ms = new( sourceArray );
+    public override long load( byte[] sourceBytes ) {
+        using MemoryStream ms = new( sourceBytes );
         using BinaryReader br = new( ms );
 
         magic = br.readString( 8 );
