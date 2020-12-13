@@ -59,7 +59,7 @@ public abstract class DemiseFileHandler<T> : IDemiseFileHandler where T : IDemis
     }
 
     public void Dispose() {
-        demiseAsset.Dispose();
+        demiseAsset?.Dispose();
 
         GC.SuppressFinalize( this );
     }
