@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using FormUtils;
 using Utils;
 using static DemiseConsts;
@@ -82,6 +83,8 @@ public class DemiseDataHandler : DemiseFileHandler<DemiseData> {
     public const int DED_HEADER_MID_OFFSET = 12,
                      DED_HEADER_END_OFFSET = 24;
 
+    private Control previewControl;
+
     public DemiseDataHandler( AutoForm parent ) : base( parent ) {
     }
 
@@ -122,11 +125,11 @@ public class DemiseDataHandler : DemiseFileHandler<DemiseData> {
             Bits.applyXorMask( bytes, xorMaskHeader, DED_HEADER_MID_OFFSET,
                                Math.Min( DED_HEADER_END_OFFSET, bytes.Length ) );
             Bits.applyXorMask( bytes, xorMaskMain, DED_HEADER_END_OFFSET, bytes.Length );
-
-            Console.Out.WriteLine( $"v{br.ReadInt16()} {br.readString( 6 ).TrimEnd()} rev.{br.ReadInt16()}" );
         }
 
         if ( fileUtil.name == "DEMISEItems.DED" ) { // TODO refactor to DemiseItemsData
+            Console.Out.WriteLine( $"v{br.ReadInt16()} {br.readString( 6 ).TrimEnd()} rev.{br.ReadInt16()}" );
+
             short expectedItemCount = br.ReadInt16();
 
             List<Item> items = new();
@@ -189,6 +192,30 @@ public class DemiseDataHandler : DemiseFileHandler<DemiseData> {
 
             Console.Out.WriteLine(
                 $"items expected: {expectedItemCount} total: {items.Count} idx: [{itemIndex.First().Key}, {itemIndex.Last().Key}]" );
+        } else if ( fileUtil.name == "DEMISEInfoItems.DED" ) {
+            // no version info here
+            ListBox listBox = new() {
+                AutoSize = true,
+                MaximumSize = new( 750, 500 ),
+                ScrollAlwaysVisible = true,
+            };
+            previewControl = listBox;
+            ushort entryCount = br.ReadUInt16();
+            int[] offsets = new int[entryCount];
+            string[] itemInfos = new string[entryCount];
+            for ( int i = 0; i < entryCount; i++ ) {
+                offsets[i] = br.ReadInt32();
+            }
+
+            for ( int i = 0; i < entryCount; i++ ) {
+                br.seek( offsets[i] + 11 );
+                int strLen = br.ReadUInt16();
+                itemInfos[i] = br.readString( strLen );
+            }
+
+            listBox.BeginUpdate();
+            listBox.Items.AddRange( itemInfos.toObjectArray() );
+            listBox.EndUpdate();
         }
 
         string newFilePath = filePath + ".decoded";
@@ -205,6 +232,9 @@ public class DemiseDataHandler : DemiseFileHandler<DemiseData> {
     public override AutoForm showPreview() {
         createPreviewForm();
 
+        if ( previewControl != null ) {
+            previewForm.add( previewControl );
+        }
         // TODO implement for at least DED Items
 
         // addSaveMenuAndShow();
