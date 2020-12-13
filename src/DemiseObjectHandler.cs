@@ -1,16 +1,14 @@
 namespace DemiseTheReversation {
 
 using System;
-using System.IO;
 using FormUtils;
-using Utils;
 
 public class DemiseObjectHandler : DemiseFileHandler<DemiseObject> {
     public DemiseObjectHandler( AutoForm parent ) : base( parent ) {
     }
 
     public override IDemiseFileHandler open( string filePath ) {
-        // Console.Out.Write( $"loading {filePath} ... " );
+        Console.Out.Write( $"loading {filePath} ... " );
         fileUtil = new( filePath );
 
         demiseAsset = new DemiseObject() {
@@ -19,7 +17,7 @@ public class DemiseObjectHandler : DemiseFileHandler<DemiseObject> {
         
         long srcPtr = loadAsset();
 
-        // Console.Out.WriteLine( $"{srcPtr} of {fileUtil.length} read." );
+        Console.Out.WriteLine( $"{srcPtr} of {fileUtil.length} read." );
 
         return this;
     }
@@ -30,8 +28,6 @@ public class DemiseObjectHandler : DemiseFileHandler<DemiseObject> {
 
     public override AutoForm showPreview() {
         createPreviewForm();
-
-        // TODO implement for at least DED Items
 
         // addSaveMenuAndShow();
         previewForm.Show();
